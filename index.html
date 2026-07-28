@@ -1,8 +1,614 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <title></title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>MIND.Funga — Solicitação de curadoria</title>
+
+  <!--
+    ============================================================================
+    PORTAL DE CURADORIA — MIND.Funga  (ticket 23)
+    ----------------------------------------------------------------------------
+    Página estática (GitHub Pages) publicada em
+    https://mindfunga.github.io/portalCuradoria/
+
+    ⚠️ O ENDEREÇO É CONTRATO COM O BACKEND. O e-mail de solicitação é montado em
+    `backend/src/controllers/CuradoriaController.ts` a partir da variável de
+    ambiente `PORTAL_CURADORIA_URL` (= a URL acima, sem barra no fim), e o link
+    fica `${PORTAL_CURADORIA_URL}/?token=…`. Ou seja: o token chega na RAIZ do
+    site, neste `index.html`. Renomear o repositório, a pasta ou este arquivo
+    quebra todos os e-mails já enviados (o token vale 48 horas) e os próximos.
+    O mesmo vale para as duas páginas de texto linkadas aqui embaixo — endereços
+    públicos deste projeto já acabaram citados fora dele (as páginas de exclusão
+    de conta hoje constam na ficha da Play Store).
+
+    ----------------------------------------------------------------------------
+    O QUE ESTA PÁGINA É — e o que ela NÃO é
+    ----------------------------------------------------------------------------
+    O percurso completo da solicitação de curadoria:
+
+      app: botão "Solicitação de curador"          (ticket 22)
+        → POST /api/usuario/curadoria/solicitar    (ticket 21)
+        → e-mail com um token de 40 hex
+        → ESTA PÁGINA: telefone + aceite dos termos
+        → POST /api/usuario/curadoria/confirmar    (ticket 21)
+        → "aguardando análise"
+        → um administrador aprova ou recusa        (ticket 24)
+
+    🔴 ENVIAR ESTE FORMULÁRIO NÃO TORNA NINGUÉM CURADOR. Ele apenas COMPLETA o
+    pedido: consome o token, grava o telefone e o aceite, e põe a solicitação na
+    fila de análise. Quem promove é uma pessoa, depois, no painel administrativo.
+
+    A página é um FILTRO, não um portão. Ela existe para fazer o clicador
+    impulsivo desacelerar — sair do app, abrir o e-mail, digitar um telefone de
+    verdade, ler pelo que ele está se responsabilizando — antes que um ser
+    humano gaste atenção analisando o pedido dele.
+
+    ----------------------------------------------------------------------------
+    🔴 NÃO EXISTE CPF AQUI
+    ----------------------------------------------------------------------------
+    A seção de termos nasceu quando o plano previa coletar CPF. O CPF foi
+    CORTADO em 2026-07-27 (dor de cabeça de LGPD): ficou SÓ o telefone, numa
+    coluna (`usuario.telefone`) que já existia e é nullable. Não acrescente
+    campo de CPF, nem menção a ele nos textos.
+
+    ----------------------------------------------------------------------------
+    DE ONDE VEIO A FORMA
+    ----------------------------------------------------------------------------
+    Do repositório `recuperacao/` (redefinição de senha), que faz exatamente o
+    mesmo desenho — "e-mail com token → página estática → POST no backend" — e
+    já roda em produção. Ver `PASSWORD_RESET_FLOW.md` na raiz do workspace.
+    Mesma leitura do `?token=`, mesmas faixas de feedback, mesmo CSS. Inventar
+    um segundo padrão seria só mais uma coisa para manter.
+
+    Visual: `app_design.md` §6 (vermelhão #E22918, texto marrom #583131, campos
+    com borda de 2px), idêntico ao `recuperacao`.
+    ============================================================================
+  -->
+
+  <style>
+    /* ===== DEFINIÇÕES visuais — app_design.md §6 =========================
+       Bloco copiado do `recuperacao/index.html` para as páginas continuarem
+       irmãs. Mexeu aqui, confira lá (e nas duas páginas de texto deste repo). */
+    :root {
+      /* ---------- Escala responsiva ----------------------------------------
+         ⚠️ ARMADILHA CONHECIDA: o app_design.md §6 sugere
+         `--escala: clamp(0.9, calc(100vw / 390), 1.15)` com vários
+         `calc(Npx * var(--escala))`. Isso NÃO funciona — dividir 100vw por 390
+         devolve um COMPRIMENTO (~1,1px), então o clamp compara 0.9 (número) com
+         um comprimento, mistura tipos e é descartado inteiro. Sem `--escala`,
+         todo `calc()` que dependia dela cai junto e a página perde bordas,
+         alturas e espaçamentos de uma vez, em silêncio.
+
+         Mesma ideia, escrita de forma válida: a escala vai para o tamanho de
+         fonte da raiz e as medidas viram `rem`. 1rem = 16px × escala, variando
+         entre 0.9 (14.4px) e 1.15 (18.4px) conforme a largura, tomando 390px
+         como referência — igual ao app. (Aqui `100vw / 390 * 16` é
+         comprimento ÷ número × número, o que é válido.) */
+      font-size: clamp(14.4px, calc(100vw / 390 * 16), 18.4px);
+
+      /* ---------- Cores ---------- */
+      --cor-primaria:      #E22918;  /* ação principal, bordas de input, marca */
+      --cor-primaria-hover:#C42214;  /* escurecimento no hover (regra §6.1.2)  */
+      --cor-primaria-tint: #FCEAE8;  /* fundo de destaque / faixa de erro      */
+      --cor-texto:         #583131;  /* corpo de texto (marrom, não preto)     */
+      --cor-superficie:    #FFFFFF;
+      --cor-neutra-escura: #333333;  /* texto sobre fundo desabilitado         */
+      --cor-desabilitada:  #BFBFBF;  /* preenchimento de botão inativo         */
+
+      /* Versões acessíveis (app_design.md §1.5) */
+      --cor-placeholder:   #8A8A8A;
+      --cor-texto-fraco:   #6E6E6E;
+      --cor-sucesso:       #2E7D32;
+      --cor-destrutiva:    #8E1A0F;
+
+      /* ---------- Tipografia ---------- */
+      /* Sem @import nem link para Google Fonts: a regra §6.1.6 pede nenhuma
+         requisição externa. Usa Open Sans se o sistema tiver; senão cai na
+         pilha de fallback. */
+      --fonte: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --fs-titulo:    1.25rem;   /* 20px */
+      --fs-corpo:     1rem;      /* 16px */
+      --fs-rotulo:    0.875rem;  /* 14px */
+      --fs-mini:      0.75rem;   /* 12px */
+
+      /* ---------- Formas ---------- */
+      --raio:         0.5rem;    /* 8px  */
+      --raio-input:   0.375rem;  /* 6px  */
+      --borda:        0.125rem;  /* 2px  */
+      --altura-campo: 3rem;      /* 48px */
+      --padding-card: 1.5rem;    /* 24px */
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      font-family: var(--fonte);
+      font-size: var(--fs-corpo);
+      color: var(--cor-texto);
+      background: var(--cor-superficie);
+    }
+
+    /* Card: borda vermelha, sem sombra (app_design.md §5.3).
+       Um pouco mais largo que o do `recuperacao` (26.25rem) porque aqui há
+       texto de responsabilidade para ler, não só dois campos de senha. */
+    .cartao {
+      width: 100%;
+      max-width: 30rem;
+      background: #fff;
+      border: var(--borda) solid var(--cor-primaria);
+      border-radius: var(--raio);
+      padding: var(--padding-card);
+    }
+
+    /* ---------- Cabeçalho com a marca ---------- */
+    .cabecalho { text-align: center; margin-bottom: 1.25rem; }
+
+    /* O logo.svg é retrato (viewBox 172×199) e monocromático no mesmo marrom do
+       texto (#583131), então encaixa na paleta sem ajuste. Ele já traz o
+       letreiro "MIND.Funga" desenhado, por isso o nome não se repete em texto. */
+    .marca { width: 5rem; height: auto; }
+
+    .subtitulo {
+      font-size: var(--fs-rotulo);
+      color: var(--cor-texto-fraco);
+      margin-top: 0.5rem;
+    }
+
+    .titulo-secao {
+      font-size: var(--fs-titulo);
+      font-weight: 700;
+      margin: 0 0 0.75rem;
+      color: var(--cor-texto);
+    }
+
+    .rotulo {
+      display: block;
+      margin-bottom: 0.3125rem;
+      font: 700 var(--fs-rotulo) / 1.36 var(--fonte);
+      color: var(--cor-texto);
+    }
+
+    .campo {
+      width: 100%;
+      height: var(--altura-campo);
+      padding: 0 0.75rem;
+      margin-bottom: 0.375rem;
+      border: var(--borda) solid var(--cor-primaria);
+      border-radius: var(--raio-input);
+      font: var(--fs-corpo) var(--fonte);
+      color: var(--cor-texto);
+      background: #fff;
+    }
+    .campo::placeholder { color: var(--cor-placeholder); }
+
+    /* O app não tem estado de foco (é só toque), mas na web sem isso a página
+       fica inutilizável para quem navega pelo teclado — regra §6.1.2. */
+    .campo:focus-visible,
+    .botao:focus-visible,
+    .caixa-aceite input:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--cor-texto);
+      outline-offset: 2px;
+    }
+
+    .botao {
+      width: 100%;
+      height: var(--altura-campo);
+      border-radius: var(--raio);
+      border: var(--borda) solid transparent;
+      font: 700 var(--fs-corpo) / 1.31 var(--fonte);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .botao--primario {
+      background: var(--cor-primaria);
+      border-color: var(--cor-primaria);
+      color: #fff;
+    }
+    .botao--primario:hover:not(:disabled) {
+      background: var(--cor-primaria-hover);
+      border-color: var(--cor-primaria-hover);
+    }
+    .botao:disabled {
+      background: var(--cor-desabilitada);
+      border-color: transparent;
+      color: var(--cor-neutra-escura);
+      cursor: not-allowed;
+    }
+
+    .ajuda {
+      font-size: var(--fs-mini);
+      line-height: 1.5;
+      color: var(--cor-texto-fraco);
+      margin: 0 0 1rem;
+    }
+    .ajuda--maior { font-size: var(--fs-rotulo); }
+
+    /* Bloco de destaque: o aviso de que preencher não promove ninguém.
+       É a expectativa que mais dá errado neste fluxo, então ganha moldura. */
+    .destaque {
+      background: var(--cor-primaria-tint);
+      border-radius: var(--raio-input);
+      padding: 0.75rem;
+      font-size: var(--fs-rotulo);
+      line-height: 1.5;
+      margin: 0 0 1.25rem;
+    }
+    .destaque strong { color: var(--cor-destrutiva); }
+
+    /* Lista das responsabilidades, resumidas na própria página.
+       O texto completo mora em termos-curadoria.html — mas quem não clica
+       precisa ao menos ter visto o essencial antes de marcar o aceite. */
+    .lista-termos {
+      margin: 0 0 1rem;
+      padding-left: 1.25rem;
+      font-size: var(--fs-rotulo);
+      line-height: 1.55;
+    }
+    .lista-termos li { margin-bottom: 0.5rem; }
+
+    a {
+      color: var(--cor-primaria);
+      font-weight: 600;
+    }
+
+    /* Linha do checkbox: caixa e texto alinhados pelo topo, porque o texto
+       ocupa mais de uma linha no celular. */
+    .caixa-aceite {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.625rem;
+      margin: 1rem 0 1.25rem;
+      font-size: var(--fs-rotulo);
+      line-height: 1.5;
+    }
+    .caixa-aceite input {
+      /* 1.15rem em vez do tamanho nativo: alvo de toque decente no celular. */
+      width: 1.15rem;
+      height: 1.15rem;
+      margin: 0.15rem 0 0;
+      flex: 0 0 auto;
+      accent-color: var(--cor-primaria);
+      cursor: pointer;
+    }
+    .caixa-aceite label { cursor: pointer; }
+
+    /* Faixa de feedback (erro / sucesso) */
+    .feedback {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: var(--raio-input);
+      font-size: var(--fs-rotulo);
+      line-height: 1.45;
+    }
+    .feedback.erro    { display: block; background: var(--cor-primaria-tint); color: var(--cor-destrutiva); }
+    .feedback.sucesso { display: block; background: #E8F5E9; color: var(--cor-sucesso); }
+
+    .oculto { display: none; }
+
+    .rodape {
+      text-align: center;
+      font-size: var(--fs-mini);
+      color: var(--cor-texto-fraco);
+      margin-top: 1.25rem;
+    }
+    .rodape a { color: var(--cor-texto-fraco); font-weight: 400; }
+  </style>
 </head>
-<body></body>
+
+<body>
+  <main class="cartao">
+    <header class="cabecalho">
+      <img class="marca" src="logo.svg" alt="MIND.Funga" width="172" height="199" />
+      <div class="subtitulo">Solicitação de curadoria</div>
+    </header>
+
+    <!-- ============ ETAPA 1: formulário (quando existe um token) ========= -->
+    <section id="etapaFormulario" class="oculto">
+      <h1 class="titulo-secao">Complete a sua solicitação</h1>
+
+      <p class="ajuda ajuda--maior">
+        Curadores conferem e confirmam as identificações de fungos enviadas
+        pelas outras pessoas. O que um curador decide aparece no aplicativo
+        como a resposta correta — por isso este passo existe: para você saber
+        exatamente o que está pedindo antes de a nossa equipe analisar.
+      </p>
+
+      <div class="destaque">
+        <strong>Preencher este formulário não torna você curador.</strong>
+        Ele envia o seu pedido para análise. Uma pessoa da equipe MIND.Funga
+        vai avaliar e responder. Enquanto isso, você continua usando o
+        aplicativo normalmente.
+      </div>
+
+      <form id="formCuradoria" autocomplete="on" novalidate>
+        <!-- ---------- Telefone: o único dado coletado aqui ---------- -->
+        <label class="rotulo" for="telefone">Telefone para contato</label>
+        <input
+          class="campo"
+          type="tel"
+          id="telefone"
+          name="telefone"
+          inputmode="numeric"
+          autocomplete="tel-national"
+          maxlength="15"
+          placeholder="(48) 99999-9999"
+          aria-describedby="ajudaTelefone"
+        />
+        <p class="ajuda" id="ajudaTelefone">
+          Com DDD. Usamos o telefone só para falar com você sobre a curadoria —
+          tirar uma dúvida sobre o seu pedido, combinar a orientação inicial ou
+          avisar de algo urgente numa identificação. Ele não aparece para outros
+          usuários e não é usado para divulgação.
+        </p>
+
+        <!-- ---------- Termos: responsabilidade, não coleta de dados ------- -->
+        <h2 class="titulo-secao">Ao aceitar, você concorda em:</h2>
+        <ul class="lista-termos">
+          <li>
+            <strong>Identificar apenas o que você conhece.</strong> Diante de
+            uma foto duvidosa, é melhor deixar sem confirmar do que arriscar um
+            nome.
+          </li>
+          <li>
+            <strong>Assumir que a sua decisão vira informação pública.</strong>
+            Quem enviou a foto, e quem consultar o aplicativo depois, vão ler a
+            sua validação como a resposta certa.
+          </li>
+          <li>
+            <strong>Não usar a curadoria para se promover</strong> nem para
+            beneficiar pessoa, empresa ou instituição.
+          </li>
+          <li>
+            <strong>Cuidar do que vê.</strong> Fotos, localizações e mensagens
+            dos usuários são material de pesquisa: não repasse nem publique fora
+            do MIND.Funga.
+          </li>
+          <li>
+            <strong>Aceitar que a curadoria é revisável.</strong> A equipe pode
+            corrigir uma validação sua e pode encerrar o seu acesso de curador
+            se estas regras não forem seguidas.
+          </li>
+        </ul>
+
+        <p class="ajuda ajuda--maior">
+          Leia o texto completo:
+          <a href="termos-curadoria.html">Termos de uso da curadoria</a>
+          e
+          <a href="privacidade-curadoria.html">Política de privacidade da curadoria</a>.
+        </p>
+
+        <div class="caixa-aceite">
+          <input type="checkbox" id="aceite" name="aceite" />
+          <label for="aceite">
+            Li e aceito os termos de uso da curadoria e a política de
+            privacidade da curadoria.
+          </label>
+        </div>
+
+        <button type="submit" class="botao botao--primario" id="btnEnviar">
+          Enviar solicitação
+        </button>
+      </form>
+    </section>
+
+    <!-- ============ ETAPA 2: link sem token / inválido ===================
+         Mesma ideia da página de senha: quem chega aqui SAIU do aplicativo e
+         não tem para onde voltar, então a explicação e o próximo passo têm que
+         estar escritos na tela. -->
+    <section id="etapaLinkInvalido" class="oculto">
+      <h1 class="titulo-secao">Este link não é válido</h1>
+      <p class="ajuda ajuda--maior">
+        Isso costuma acontecer quando o endereço foi copiado pela metade,
+        quando o link já foi usado, ou quando passaram mais de 48 horas desde o
+        pedido.
+      </p>
+      <p class="ajuda ajuda--maior">
+        Abra o aplicativo MIND.Funga, vá até o seu perfil e peça a curadoria de
+        novo — você recebe um link novo por e-mail.
+      </p>
+    </section>
+
+    <!-- ============ ETAPA 3: sucesso ===================================== -->
+    <section id="etapaSucesso" class="oculto">
+      <h1 class="titulo-secao">Solicitação enviada</h1>
+      <p class="ajuda ajuda--maior" id="textoSucesso"></p>
+      <p class="ajuda ajuda--maior">
+        Pode fechar esta página. Você não precisa fazer mais nada agora.
+      </p>
+    </section>
+
+    <!-- Faixa de feedback compartilhada.
+         `aria-live` faz o leitor de tela anunciar a mensagem quando ela surge. -->
+    <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+
+    <div class="rodape">
+      Projeto de pesquisa MIND.Funga — UFSC
+    </div>
+  </main>
+
+  <script>
+    // ======================================================================
+    // DEFINIÇÕES (ajuste aqui se a URL da API mudar)
+    // ======================================================================
+    const API_BASE = "https://mindfunga2.setic.ufsc.br/api";
+
+    // Quantos dígitos um telefone brasileiro válido tem, já com DDD:
+    // 10 = fixo (48 3333-4444), 11 = celular com o 9 na frente.
+    const MIN_DIGITOS_TELEFONE = 10;
+    const MAX_DIGITOS_TELEFONE = 11;
+
+    // ======================================================================
+    // Atalhos para os elementos manipulados
+    // ======================================================================
+    const etapaFormulario   = document.getElementById("etapaFormulario");
+    const etapaLinkInvalido = document.getElementById("etapaLinkInvalido");
+    const etapaSucesso      = document.getElementById("etapaSucesso");
+    const textoSucesso      = document.getElementById("textoSucesso");
+    const feedback          = document.getElementById("feedback");
+    const campoTelefone     = document.getElementById("telefone");
+    const campoAceite       = document.getElementById("aceite");
+    const btnEnviar         = document.getElementById("btnEnviar");
+
+    function mostrarFeedback(texto, tipo) {
+      feedback.textContent = texto;
+      feedback.className = "feedback " + tipo; // "erro" | "sucesso"
+    }
+    function limparFeedback() {
+      feedback.className = "feedback";
+      feedback.textContent = "";
+    }
+
+    // ======================================================================
+    // O token vem do ?token= da própria URL
+    // ----------------------------------------------------------------------
+    // O backend monta o link como `${PORTAL_CURADORIA_URL}/?token=…`, então o
+    // token chega na query string desta página. Não há e-mail nem id na URL —
+    // de propósito: um link que carrega identidade acaba em histórico de
+    // navegador, em print de tela e no cabeçalho `Referer`.
+    // ======================================================================
+    const parametros = new URLSearchParams(window.location.search);
+    const token = parametros.get("token");
+
+    // Sem token não adianta mostrar formulário: o envio falharia de qualquer
+    // jeito e a pessoa teria digitado tudo à toa. O `"null"` como string
+    // aparece quando algum lugar interpola uma variável vazia dentro do link.
+    const tokenPresente =
+      Boolean(token) && token !== "null" && token.trim() !== "";
+
+    if (tokenPresente) {
+      etapaFormulario.classList.remove("oculto");
+    } else {
+      etapaLinkInvalido.classList.remove("oculto");
+    }
+
+    // ======================================================================
+    // Máscara de telefone brasileiro
+    // ----------------------------------------------------------------------
+    // Formata enquanto a pessoa digita, aceitando os dois formatos:
+    //   10 dígitos → (48) 3333-4444     (fixo)
+    //   11 dígitos → (48) 99999-9999    (celular)
+    // Guardamos só o que é dígito e remontamos a string a cada tecla; assim
+    // apagar, colar e digitar no meio nunca deixam a máscara inconsistente.
+    // ======================================================================
+    function somenteDigitos(texto) {
+      return (texto || "").replace(/\D/g, "");
+    }
+
+    function formatarTelefone(texto) {
+      const d = somenteDigitos(texto).slice(0, MAX_DIGITOS_TELEFONE);
+
+      if (d.length === 0) return "";
+      if (d.length <= 2) return "(" + d;
+      // Até 6 dígitos ainda não dá para saber onde vai o hífen: só o DDD sai
+      // fechado entre parênteses.
+      if (d.length <= 6) return "(" + d.slice(0, 2) + ") " + d.slice(2);
+      // Com 7 a 10 dígitos tratamos como fixo (4 dígitos depois do hífen);
+      // ao chegar no 11º, o primeiro bloco vira de 5 e a máscara vira celular.
+      if (d.length <= 10) {
+        return "(" + d.slice(0, 2) + ") " + d.slice(2, 6) + "-" + d.slice(6);
+      }
+      return "(" + d.slice(0, 2) + ") " + d.slice(2, 7) + "-" + d.slice(7);
+    }
+
+    campoTelefone.addEventListener("input", () => {
+      campoTelefone.value = formatarTelefone(campoTelefone.value);
+    });
+
+    // ======================================================================
+    // Envio: valida no cliente e chama POST /api/usuario/curadoria/confirmar
+    // ======================================================================
+    document.getElementById("formCuradoria").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      limparFeedback();
+
+      const digitos = somenteDigitos(campoTelefone.value);
+
+      // Conferências locais — evitam uma ida ao servidor à toa e dão uma
+      // mensagem mais específica do que a do backend (que, sem regex de
+      // formato, só exige de 10 a 20 caracteres).
+      if (digitos.length < MIN_DIGITOS_TELEFONE || digitos.length > MAX_DIGITOS_TELEFONE) {
+        mostrarFeedback(
+          "Digite um telefone válido com DDD — 10 dígitos para fixo ou 11 para celular.",
+          "erro"
+        );
+        campoTelefone.focus();
+        return;
+      }
+      if (!campoAceite.checked) {
+        // O backend também recusa (o yup exige `aceite_termos` exatamente
+        // `true`), mas a mensagem daqui é mais direta.
+        mostrarFeedback(
+          "É preciso aceitar os termos da curadoria para enviar a solicitação.",
+          "erro"
+        );
+        campoAceite.focus();
+        return;
+      }
+
+      btnEnviar.disabled = true;
+      btnEnviar.textContent = "Enviando...";
+
+      try {
+        // Mandamos o telefone JÁ FORMATADO: o backend não impõe formato e quem
+        // lê esse campo depois é uma pessoa, no painel de administração,
+        // decidindo se liga ou não.
+        const resposta = await fetch(`${API_BASE}/usuario/curadoria/confirmar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token: token,
+            telefone: campoTelefone.value,
+            aceite_termos: true,
+          }),
+        });
+
+        const dados = await resposta.json();
+
+        // ⚠️⚠️ A ARMADILHA MAIS REPETIDA DESTE PROJETO:
+        // a API responde HTTP 200 mesmo quando dá errado. Quem diz se deu certo
+        // é o campo `error` do JSON — NUNCA o `resposta.ok` nem o status.
+        // Se olhássemos o status, diríamos "pronto!" para uma solicitação que
+        // falhou, e a pessoa nunca mais voltaria aqui.
+        // (app_design.md §6.1.5.)
+        if (dados.error) {
+          mostrarFeedback(
+            dados.message || "Não foi possível enviar a sua solicitação.",
+            "erro"
+          );
+          btnEnviar.disabled = false;
+          btnEnviar.textContent = "Enviar solicitação";
+          return;
+        }
+
+        // Sucesso: o formulário some para ninguém reenviar (o token já foi
+        // consumido) e fica só a confirmação na tela.
+        // A mensagem vem do backend porque ele distingue dois casos: o pedido
+        // entrou na fila, ou a pessoa já era curadora antes de clicar no link.
+        etapaFormulario.classList.add("oculto");
+        textoSucesso.textContent =
+          dados.message ||
+          "A sua solicitação foi enviada para análise da equipe MIND.Funga.";
+        etapaSucesso.classList.remove("oculto");
+      } catch (err) {
+        // Cai aqui em queda de rede, DNS, CORS ou resposta que não é JSON.
+        mostrarFeedback(
+          "Erro de conexão com o servidor. Verifique sua internet e tente novamente.",
+          "erro"
+        );
+        btnEnviar.disabled = false;
+        btnEnviar.textContent = "Enviar solicitação";
+      }
+    });
+  </script>
+</body>
 </html>

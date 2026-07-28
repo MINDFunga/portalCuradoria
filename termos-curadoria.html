@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Termos de uso da curadoria do MIND.Funga: o que se espera de quem valida identificações de fungos." />
+  <title>Termos de uso da curadoria — MIND.Funga</title>
+
+  <!--
+    ============================================================================
+    TERMOS DE USO DA CURADORIA — MIND.Funga  (ticket 23)
+    ----------------------------------------------------------------------------
+    Publicada em https://mindfunga.github.io/portalCuradoria/termos-curadoria.html
+    Linkada pelo `index.html` deste mesmo repositório (o portal de solicitação).
+
+    ⚠️ NÃO RENOMEIE ESTE ARQUIVO. Endereços públicos deste projeto já foram
+    parar fora dele (as páginas de exclusão de conta constam na Play Store).
+    Renomear quebra o link do portal e qualquer citação futura.
+
+    ----------------------------------------------------------------------------
+    O QUE ESTE DOCUMENTO É — e o que ele não é
+    ----------------------------------------------------------------------------
+    NÃO substitui os Termos e Condições gerais do aplicativo
+    (https://mindfunga.github.io/TermsAndConditions/), que continuam valendo
+    para todo mundo. Este texto é um ACRÉSCIMO: trata só das responsabilidades
+    de quem passa a validar identificações que os outros usuários leem como
+    verdade.
+
+    🔴 NÃO EXISTE CPF AQUI. A seção de termos do portal nasceu quando o plano
+    previa coletar CPF; o CPF foi CORTADO em 2026-07-27 (LGPD). Ficou só o
+    telefone. Não acrescente menção a CPF neste texto.
+
+    ⚠️ Escrito para leigo: frases curtas, sem jargão jurídico e sem "outrossim".
+    Se for revisar, mantenha esse registro — o público é gente que fotografa
+    cogumelo, não advogado.
+    ============================================================================
+  -->
+
+  <style>
+    /* Mesma base visual do `index.html` (app_design.md §6). A armadilha da
+       escala está explicada lá: NUNCA troque este clamp por
+       `--escala: clamp(0.9, calc(100vw / 390), 1.15)` — mistura tipos, é
+       descartado, e derruba todo calc() que dependia dele, em silêncio. */
+    :root {
+      font-size: clamp(14.4px, calc(100vw / 390 * 16), 18.4px);
+      --cor-primaria:      #E22918;
+      --cor-primaria-tint: #FCEAE8;
+      --cor-texto:         #583131;
+      --cor-texto-fraco:   #6E6E6E;
+      --cor-destrutiva:    #8E1A0F;
+      --fonte: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --raio: 0.5rem;
+      --borda: 0.125rem;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 1.5rem 1rem 3rem;
+      font-family: var(--fonte);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--cor-texto);
+      background: #fff;
+    }
+
+    /* Medida de leitura larga (34rem) — é documento para ler inteiro, não
+       formulário. Mesmo desvio combinado nas páginas de política/termos. */
+    main {
+      max-width: 34rem;
+      margin: 0 auto;
+      border: var(--borda) solid var(--cor-primaria);
+      border-radius: var(--raio);
+      padding: 1.5rem;
+    }
+
+    .cabecalho { text-align: center; margin-bottom: 1.5rem; }
+    .marca { width: 4.5rem; height: auto; }
+    .subtitulo { font-size: 0.875rem; color: var(--cor-texto-fraco); margin-top: 0.5rem; }
+
+    h1 { font-size: 1.375rem; margin: 0 0 0.25rem; }
+    h2 { font-size: 1.0625rem; margin: 1.75rem 0 0.5rem; }
+    p, li { font-size: 0.9375rem; }
+    ul { padding-left: 1.25rem; }
+    li { margin-bottom: 0.5rem; }
+
+    .vigencia { font-size: 0.8125rem; color: var(--cor-texto-fraco); margin: 0 0 1.5rem; }
+
+    .destaque {
+      background: var(--cor-primaria-tint);
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      font-size: 0.9375rem;
+      margin: 1rem 0;
+    }
+    .destaque strong { color: var(--cor-destrutiva); }
+
+    a { color: var(--cor-primaria); font-weight: 600; }
+    a:focus-visible { outline: 2px solid var(--cor-texto); outline-offset: 2px; }
+
+    .rodape {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--cor-texto-fraco);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header class="cabecalho">
+      <img class="marca" src="logo.svg" alt="MIND.Funga" width="172" height="199" />
+      <div class="subtitulo">Termos de uso da curadoria</div>
+    </header>
+
+    <h1>Termos de uso da curadoria</h1>
+    <p class="vigencia">Versão 1.0 — vigente desde 27/07/2026</p>
+
+    <p>
+      Este texto explica o que se espera de quem participa da curadoria do
+      MIND.Funga. Ele <strong>complementa</strong> os
+      <a href="https://mindfunga.github.io/TermsAndConditions/">Termos e Condições</a>
+      e a
+      <a href="https://mindfunga.github.io/PrivacyPolicy/">Política de Privacidade</a>
+      do aplicativo, que continuam valendo para você como para qualquer usuário.
+    </p>
+
+    <div class="destaque">
+      <strong>Aceitar estes termos não torna você curador.</strong>
+      Aceitar apenas completa o seu pedido e o coloca na fila de análise. Uma
+      pessoa da equipe MIND.Funga avalia cada solicitação e responde. Só depois
+      dessa aprovação as regras abaixo passam a valer para você na prática.
+    </div>
+
+    <h2>1. O que é a curadoria</h2>
+    <p>
+      O MIND.Funga recebe fotos de fungos enviadas por qualquer pessoa e
+      sugere uma espécie usando um modelo de inteligência artificial. Essa
+      sugestão é um palpite: pode estar errada. O curador é quem olha a
+      submissão e decide se a identificação está correta, corrige quando sabe a
+      espécie certa, ou reprova quando o material não permite concluir nada.
+    </p>
+    <p>
+      A decisão do curador é o que fica registrado no aplicativo. Ela alimenta
+      a base de dados da pesquisa e pode, no futuro, ser usada para treinar
+      novas versões do modelo. Um erro seu não fica só naquela foto:
+      ele se propaga.
+    </p>
+
+    <h2>2. Compromissos de quem faz curadoria</h2>
+    <ul>
+      <li>
+        <strong>Identificar apenas dentro do que você conhece.</strong>
+        Ninguém domina todos os grupos de fungos. Diante de uma foto duvidosa,
+        de um grupo que você não estuda ou de material insuficiente, deixe sem
+        confirmar. Não confirmar é uma resposta legítima e prevista; chutar
+        não é.
+      </li>
+      <li>
+        <strong>Basear a decisão no material enviado.</strong> Use as fotos, o
+        substrato e a localização informados. Se faltar informação para
+        concluir, a submissão não deve ser validada.
+      </li>
+      <li>
+        <strong>Assumir que a sua decisão é pública.</strong> Quem enviou a
+        foto — e quem consultar o aplicativo depois — vai ler a sua validação
+        como a resposta certa. Trate cada validação como uma afirmação sua.
+      </li>
+      <li>
+        <strong>Não usar a curadoria em benefício próprio ou de terceiros.</strong>
+        A posição de curador não deve ser usada para se promover, para
+        favorecer pessoa, empresa, instituição ou linha de pesquisa, nem para
+        obter vantagem sobre outros usuários.
+      </li>
+      <li>
+        <strong>Respeitar quem enviou.</strong> As mensagens trocadas com os
+        usuários fazem parte do trabalho: responda com educação, mesmo quando a
+        identificação sugerida estiver muito errada. Muita gente que envia
+        está aprendendo.
+      </li>
+      <li>
+        <strong>Não prestar orientação sobre consumo.</strong> O MIND.Funga não
+        diz se um fungo é comestível, medicinal ou tóxico, e a curadoria não é
+        canal para esse tipo de conselho. Confirmar uma espécie nunca é
+        autorização para alguém comer, colher ou usar nada.
+      </li>
+      <li>
+        <strong>Manter os seus dados de contato atualizados</strong> enquanto
+        for curador, para que a equipe consiga falar com você.
+      </li>
+    </ul>
+
+    <h2>3. Cuidado com o material dos usuários</h2>
+    <p>
+      Ao fazer curadoria, você tem acesso a fotos, coordenadas de localização e
+      mensagens enviadas por outras pessoas. Esse material é de pesquisa e dos
+      usuários — não é seu.
+    </p>
+    <ul>
+      <li>
+        Não republique, não repasse e não divulgue esse conteúdo fora do
+        MIND.Funga sem autorização da coordenação do projeto.
+      </li>
+      <li>
+        Trate a localização com cuidado especial: ela pode indicar a
+        propriedade ou a rotina de quem enviou, e em alguns casos aponta
+        populações de espécies sensíveis à coleta.
+      </li>
+      <li>
+        Não use os contatos dos usuários para assuntos alheios à curadoria.
+      </li>
+    </ul>
+
+    <h2>4. Uso do seu telefone</h2>
+    <p>
+      Para completar a solicitação, pedimos um telefone com DDD. Ele serve para
+      a equipe falar com você sobre a curadoria: esclarecer uma dúvida do seu
+      pedido, combinar a orientação inicial, ou avisar de algo urgente em uma
+      identificação.
+    </p>
+    <p>
+      O telefone <strong>não aparece para outros usuários</strong>, não é usado
+      para divulgação e não é compartilhado com terceiros. Os detalhes estão na
+      <a href="privacidade-curadoria.html">Política de privacidade da curadoria</a>.
+    </p>
+
+    <h2>5. Análise do pedido</h2>
+    <p>
+      Cada solicitação é analisada por uma pessoa da equipe. Levamos em conta o
+      perfil informado no cadastro, a experiência declarada e o histórico de
+      contribuições no aplicativo. Não há prazo garantido de resposta, e o
+      projeto pode recusar uma solicitação sem que isso signifique qualquer
+      juízo sobre a pessoa — a equipe de curadoria é pequena por escolha.
+    </p>
+    <p>
+      Um pedido recusado pode ser refeito mais adiante, com mais histórico de
+      contribuição.
+    </p>
+
+    <h2>6. A curadoria é revisável e pode ser encerrada</h2>
+    <p>
+      A coordenação do projeto pode rever qualquer validação feita por um
+      curador, corrigir o que estiver errado e encerrar o acesso de curador
+      quando estes compromissos não forem cumpridos — por exemplo, em caso de
+      validações reiteradamente incorretas, uso indevido do material dos
+      usuários ou conduta desrespeitosa.
+    </p>
+    <p>
+      Você também pode deixar a curadoria quando quiser: basta avisar a equipe.
+      Perder ou deixar o acesso de curador não afeta a sua conta de usuário, que
+      continua funcionando normalmente.
+    </p>
+
+    <h2>7. Natureza da participação</h2>
+    <p>
+      A curadoria é <strong>voluntária</strong> e ligada a um projeto de
+      pesquisa da Universidade Federal de Santa Catarina. Não gera vínculo
+      empregatício, remuneração, bolsa nem qualquer obrigação de dedicação
+      mínima. Você contribui no ritmo que puder.
+    </p>
+
+    <h2>8. Mudanças neste texto</h2>
+    <p>
+      Se estas regras mudarem, a nova versão é publicada nesta mesma página,
+      com número de versão e data, e os curadores são avisados por e-mail.
+    </p>
+
+    <h2>9. Dúvidas</h2>
+    <p>
+      Fale com a equipe pelo e-mail
+      <a href="mailto:mind.funga.app@gmail.com">mind.funga.app@gmail.com</a>.
+    </p>
+
+    <p style="margin-top:2rem">
+      <a href="index.html">← Voltar para a solicitação de curadoria</a>
+    </p>
+
+    <div class="rodape">Projeto de pesquisa MIND.Funga — UFSC</div>
+  </main>
+</body>
+</html>

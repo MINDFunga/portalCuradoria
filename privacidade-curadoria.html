@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Política de privacidade da curadoria do MIND.Funga: quais dados o pedido de curadoria acrescenta e como eles são usados." />
+  <title>Política de privacidade da curadoria — MIND.Funga</title>
+
+  <!--
+    ============================================================================
+    POLÍTICA DE PRIVACIDADE DA CURADORIA — MIND.Funga  (ticket 23)
+    ----------------------------------------------------------------------------
+    Publicada em
+    https://mindfunga.github.io/portalCuradoria/privacidade-curadoria.html
+    Linkada pelo `index.html` (portal de solicitação) e pelo
+    `termos-curadoria.html` deste mesmo repositório.
+
+    ⚠️ NÃO RENOMEIE ESTE ARQUIVO — endereços públicos deste projeto já foram
+    parar fora dele (as páginas de exclusão de conta constam na Play Store).
+
+    ----------------------------------------------------------------------------
+    ESCOPO: é um ACRÉSCIMO, não uma segunda política
+    ----------------------------------------------------------------------------
+    A política que vale para todo mundo é
+    https://mindfunga.github.io/PrivacyPolicy/ . Esta página cobre só o DELTA do
+    fluxo de curadoria — o que o pedido acrescenta em relação a uma conta comum.
+    Se algo aqui contradisser a política geral, prevalece a geral: duas
+    políticas divergentes é exatamente o problema que este recorte evita.
+
+    ----------------------------------------------------------------------------
+    🔴 NÃO EXISTE CPF
+    ----------------------------------------------------------------------------
+    O plano original previa coletar CPF; o Vince CORTOU em 2026-07-27 por causa
+    da LGPD. Ficou SÓ o telefone, gravado em `usuario.telefone` (coluna que já
+    existia, nullable) e na linha da solicitação. Não acrescente CPF em lugar
+    nenhum deste fluxo.
+
+    ----------------------------------------------------------------------------
+    AS AFIRMAÇÕES ABAIXO FORAM CONFERIDAS CONTRA O CÓDIGO
+    ----------------------------------------------------------------------------
+    `backend/src/controllers/CuradoriaController.ts` (ticket 21). O que o
+    `confirmar` realmente grava: `telefone`, `aceite_termos`, `data_confirmacao`,
+    `status`, e o mesmo telefone em `usuario.telefone`. O que ele registra desde
+    o pedido: e-mail, perfil no momento do pedido e quantidade de submissões
+    aprovadas. NÃO escreva aqui nada que o código não faça — foi assim que a
+    política geral acabou prometendo analytics que o app nem tem (ticket 13).
+    ============================================================================
+  -->
+
+  <style>
+    /* Mesma base visual das outras páginas deste repo (app_design.md §6).
+       A armadilha da escala está explicada no `index.html`: nunca troque este
+       clamp por `--escala: clamp(0.9, calc(100vw / 390), 1.15)`. */
+    :root {
+      font-size: clamp(14.4px, calc(100vw / 390 * 16), 18.4px);
+      --cor-primaria:      #E22918;
+      --cor-primaria-tint: #FCEAE8;
+      --cor-texto:         #583131;
+      --cor-texto-fraco:   #6E6E6E;
+      --cor-destrutiva:    #8E1A0F;
+      --fonte: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --raio: 0.5rem;
+      --borda: 0.125rem;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 1.5rem 1rem 3rem;
+      font-family: var(--fonte);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--cor-texto);
+      background: #fff;
+    }
+
+    main {
+      max-width: 34rem;
+      margin: 0 auto;
+      border: var(--borda) solid var(--cor-primaria);
+      border-radius: var(--raio);
+      padding: 1.5rem;
+    }
+
+    .cabecalho { text-align: center; margin-bottom: 1.5rem; }
+    .marca { width: 4.5rem; height: auto; }
+    .subtitulo { font-size: 0.875rem; color: var(--cor-texto-fraco); margin-top: 0.5rem; }
+
+    h1 { font-size: 1.375rem; margin: 0 0 0.25rem; }
+    h2 { font-size: 1.0625rem; margin: 1.75rem 0 0.5rem; }
+    p, li, td, th { font-size: 0.9375rem; }
+    ul { padding-left: 1.25rem; }
+    li { margin-bottom: 0.5rem; }
+
+    .vigencia { font-size: 0.8125rem; color: var(--cor-texto-fraco); margin: 0 0 1.5rem; }
+
+    .destaque {
+      background: var(--cor-primaria-tint);
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      font-size: 0.9375rem;
+      margin: 1rem 0;
+    }
+    .destaque strong { color: var(--cor-destrutiva); }
+
+    /* Tabela do "o que guardamos": rola sozinha em tela estreita em vez de
+       empurrar a página inteira para o lado. */
+    .rolagem { overflow-x: auto; margin: 0.75rem 0 1rem; }
+    table { border-collapse: collapse; width: 100%; min-width: 22rem; }
+    th, td { text-align: left; vertical-align: top; padding: 0.5rem; border-bottom: 1px solid #E5D8D8; }
+    th { font-weight: 700; }
+
+    a { color: var(--cor-primaria); font-weight: 600; }
+    a:focus-visible { outline: 2px solid var(--cor-texto); outline-offset: 2px; }
+
+    .rodape {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--cor-texto-fraco);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header class="cabecalho">
+      <img class="marca" src="logo.svg" alt="MIND.Funga" width="172" height="199" />
+      <div class="subtitulo">Política de privacidade da curadoria</div>
+    </header>
+
+    <h1>Política de privacidade da curadoria</h1>
+    <p class="vigencia">Versão 1.0 — vigente desde 27/07/2026</p>
+
+    <p>
+      A política que vale para qualquer usuário do MIND.Funga é a
+      <a href="https://mindfunga.github.io/PrivacyPolicy/">Política de Privacidade</a>
+      do aplicativo. Esta página trata apenas do que o
+      <strong>pedido de curadoria acrescenta</strong> a ela. Em caso de
+      divergência, vale a política geral.
+    </p>
+
+    <div class="destaque">
+      <strong>Não pedimos nenhum documento de identificação.</strong>
+      O único dado novo do pedido de curadoria é um telefone de contato.
+    </div>
+
+    <h2>1. O que este pedido guarda</h2>
+    <div class="rolagem">
+      <table>
+        <thead>
+          <tr><th>Dado</th><th>Para quê</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Telefone com DDD</td>
+            <td>Falar com você sobre a curadoria: dúvida sobre o pedido,
+                orientação inicial, aviso urgente em uma identificação.</td>
+          </tr>
+          <tr>
+            <td>Aceite dos termos, com data e hora</td>
+            <td>Registrar que você leu e concordou com as responsabilidades
+                antes de o pedido entrar na fila.</td>
+          </tr>
+          <tr>
+            <td>Seu e-mail de cadastro</td>
+            <td>Enviar o link desta página e responder o resultado da análise.
+                Já constava da sua conta.</td>
+          </tr>
+          <tr>
+            <td>O perfil informado no cadastro e quantas das suas submissões já
+                foram validadas</td>
+            <td>Dar contexto a quem analisa o pedido. São dados que o
+                aplicativo já tinha; ficam anotados no momento do pedido para
+                a análise ser justa mesmo meses depois.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      O telefone também passa a constar da sua conta, no campo de contato que já
+      existe no cadastro. É o mesmo número, guardado uma vez.
+    </p>
+
+    <h2>2. Quem vê esses dados</h2>
+    <ul>
+      <li>
+        <strong>A equipe do MIND.Funga</strong> — as pessoas que analisam os
+        pedidos de curadoria e coordenam o projeto na UFSC.
+      </li>
+      <li>
+        <strong>Ninguém mais.</strong> O telefone não aparece no aplicativo para
+        outros usuários, não é publicado, não é vendido e não é compartilhado
+        com terceiros para divulgação.
+      </li>
+    </ul>
+    <p>
+      Os dados ficam no mesmo banco de dados do aplicativo, hospedado na
+      infraestrutura da UFSC, sob as mesmas condições descritas na política
+      geral. O envio desta página para o servidor é feito por conexão
+      criptografada (HTTPS).
+    </p>
+
+    <h2>3. O link do e-mail</h2>
+    <p>
+      O link que você recebeu por e-mail carrega apenas um código aleatório —
+      não leva o seu e-mail nem o seu número de conta no endereço. Esse código
+      vale por 48 horas, serve uma única vez e deixa de funcionar assim que o
+      formulário é enviado. Se o link vencer, peça outro pelo aplicativo.
+    </p>
+
+    <h2>4. Por quanto tempo guardamos</h2>
+    <p>
+      O registro do pedido — inclusive de pedidos recusados — é mantido
+      enquanto a sua conta existir. Ele é o histórico que permite à equipe
+      entender decisões antigas e evita analisar a mesma pessoa do zero a cada
+      pedido novo.
+    </p>
+    <p>
+      Ao excluir a sua conta pelo aplicativo, esses dados são excluídos junto,
+      como descrito na política geral.
+    </p>
+
+    <h2>5. Recusar ou desistir</h2>
+    <p>
+      Informar o telefone e aceitar os termos é <strong>opcional</strong>: é o
+      preço de participar da curadoria, não de usar o MIND.Funga. Se você não
+      quiser, é só fechar a página — a sua conta continua funcionando
+      normalmente, com todos os recursos, e nada é registrado.
+    </p>
+    <p>
+      Se mudar de ideia depois de enviar, ou quiser corrigir ou apagar o
+      telefone informado, fale com a equipe.
+    </p>
+
+    <h2>6. Seus direitos e contato</h2>
+    <p>
+      Valem aqui os mesmos direitos da Lei Geral de Proteção de Dados (LGPD)
+      descritos na política geral: confirmar quais dados temos, corrigir,
+      pedir a exclusão e retirar o consentimento. Para exercê-los, escreva para
+      <a href="mailto:mind.funga.app@gmail.com">mind.funga.app@gmail.com</a>.
+    </p>
+
+    <h2>7. Mudanças neste texto</h2>
+    <p>
+      Se esta política mudar, a nova versão é publicada nesta mesma página, com
+      número de versão e data, e os curadores são avisados por e-mail.
+    </p>
+
+    <p style="margin-top:2rem">
+      <a href="index.html">← Voltar para a solicitação de curadoria</a>
+      &nbsp;·&nbsp;
+      <a href="termos-curadoria.html">Termos de uso da curadoria</a>
+    </p>
+
+    <div class="rodape">Projeto de pesquisa MIND.Funga — UFSC</div>
+  </main>
+</body>
+</html>
