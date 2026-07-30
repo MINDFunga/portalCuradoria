@@ -44,6 +44,13 @@ O bloco é **duplicado nos três arquivos, de propósito** — é GitHub Pages, 
 build; um `<script src>` compartilhado seria mais um arquivo e mais uma requisição para
 economizar linha nenhuma. **Mexeu num, mexa nos três.**
 
+⚠️ **Toda navegação interna do portal é na MESMA aba — não use `target="_blank"`.** Os links
+para os documentos já tiveram `target="_blank"`, e ele foi **retirado depois de teste em
+produção** (ticket 29, 2026-07-30): com a propagação do token funcionando, a aba nova vira
+estorvo — clicar "← Voltar para a solicitação" dentro do documento abria uma **segunda** aba
+com o formulário, e a primeira ficava para trás. Na mesma aba, o botão "voltar" do navegador e
+o link de voltar fazem a mesma coisa, que é o que a pessoa espera.
+
 Sobre segurança: o destino é montado com `new URL(relativo, location.href)` +
 `searchParams.set()`, e atribuído em `.href` (nunca `innerHTML`). Isso resolve contra a origem
 da própria página, então o esquema é sempre o dela — um token hostil (`javascript:`, `"><img

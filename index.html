@@ -382,18 +382,22 @@
 
         <!-- `data-leva-token`: marca os links internos do portal que precisam
              carregar o `?token=` adiante. Quem faz isso é o bloco "PROPAGAÇÃO
-             DO TOKEN" lá embaixo, no script da página. Sem isso, quem abre os documentos
-             volta para um `index.html` sem token e perde a solicitação.
-             `target="_blank"` é conforto (mantém o formulário vivo numa aba
-             própria), NÃO é a correção — em navegador de celular a aba nova
-             costuma ser indistinguível de uma navegação normal. -->
+             DO TOKEN" lá embaixo, no script da página. Sem isso, quem abre os
+             documentos volta para um `index.html` sem token e perde a solicitação.
+
+             ⚠️ NÃO coloque `target="_blank"` aqui. Já esteve, e foi retirado
+             depois de teste em produção (ticket 29, 2026-07-30): com a
+             propagação do token funcionando, a aba nova só atrapalha — clicar
+             "voltar" dentro do documento abria uma SEGUNDA aba com o
+             formulário, e a primeira ficava velha. A navegação é na mesma aba,
+             de propósito: assim o botão "voltar" do navegador e o link
+             "← Voltar para a solicitação" fazem a mesma coisa, que é o que a
+             pessoa espera. -->
         <p class="ajuda ajuda--maior">
           Leia o texto completo:
-          <a href="termos-curadoria.html" data-leva-token
-             target="_blank" rel="noopener">Termos de uso da curadoria</a>
+          <a href="termos-curadoria.html" data-leva-token>Termos de uso da curadoria</a>
           e
-          <a href="privacidade-curadoria.html" data-leva-token
-             target="_blank" rel="noopener">Política de privacidade da curadoria</a>.
+          <a href="privacidade-curadoria.html" data-leva-token>Política de privacidade da curadoria</a>.
         </p>
 
         <div class="caixa-aceite">
