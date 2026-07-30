@@ -20,6 +20,37 @@ responsabilidade.
 | `privacidade-curadoria.html` | O *delta* de privacidade deste fluxo (só o telefone). Complementa a política geral. |
 | `logo.svg` | O logo do app. **Mesmo arquivo** nos repositórios de páginas. |
 
+## ⚠️ `data-leva-token` — o token viaja pela URL entre as três páginas
+
+O token **só existe na query string**. Não há sessão, cookie nem storage (de propósito: ele é
+credencial de uso único, e no storage sobreviveria ao fluxo e ficaria legível para qualquer
+outra página de `mindfunga.github.io`, que hospeda todos os sites do projeto).
+
+Consequência: **todo link interno entre as três páginas precisa levar o `?token=` junto.**
+A convenção é marcar esses links com o atributo **`data-leva-token`**; um bloco de ~10 linhas
+no fim de cada página reescreve o `href` deles com o token da URL atual.
+
+```html
+<a href="index.html" data-leva-token>← Voltar para a solicitação</a>
+```
+
+🔴 **Se um link interno novo não tiver `data-leva-token`, ele derruba a solicitação da pessoa**
+— ela cai num `index.html` sem token, o portal não sabe quem ela é, e o único jeito de voltar é
+achar o e-mail original. Foi exatamente o bug do **ticket 29**, e ele castigava justamente quem
+fazia a coisa certa: quem parava para ler os documentos perdia o pedido; quem só marcava o
+aceite passava direto.
+
+O bloco é **duplicado nos três arquivos, de propósito** — é GitHub Pages, HTML estático, sem
+build; um `<script src>` compartilhado seria mais um arquivo e mais uma requisição para
+economizar linha nenhuma. **Mexeu num, mexa nos três.**
+
+Sobre segurança: o destino é montado com `new URL(relativo, location.href)` +
+`searchParams.set()`, e atribuído em `.href` (nunca `innerHTML`). Isso resolve contra a origem
+da própria página, então o esquema é sempre o dela — um token hostil (`javascript:`, `"><img
+onerror=…>`, `https://evil.com/`) vira valor percent-encodado e nada mais. **Por isso o formato
+do token não é validado no portal**: não acrescentaria segurança e quebraria o portal calado se
+o backend mudasse o tamanho do token. Julgar o token é trabalho do backend.
+
 ## O fluxo inteiro
 
 ```

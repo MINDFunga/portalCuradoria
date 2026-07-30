@@ -249,12 +249,54 @@
     </p>
 
     <p style="margin-top:2rem">
-      <a href="index.html">← Voltar para a solicitação de curadoria</a>
+      <a href="index.html" data-leva-token>← Voltar para a solicitação de curadoria</a>
       &nbsp;·&nbsp;
-      <a href="termos-curadoria.html">Termos de uso da curadoria</a>
+      <a href="termos-curadoria.html" data-leva-token>Termos de uso da curadoria</a>
     </p>
 
     <div class="rodape">Projeto de pesquisa MIND.Funga — UFSC</div>
   </main>
+
+  <script>
+    // ======================================================================
+    // PROPAGAÇÃO DO TOKEN ENTRE AS PÁGINAS DO PORTAL
+    // ----------------------------------------------------------------------
+    // Bloco idêntico ao de `index.html` e de `termos-curadoria.html` —
+    // a explicação longa (por que é seguro, por que não usar storage, por que
+    // não validar o formato do token) está no `index.html`, que é a página
+    // principal do fluxo. Aqui fica só o essencial.
+    //
+    // Sem isto, o link "← Voltar para a solicitação" leva para um
+    // `index.html` SEM o `?token=`, o portal não tem como saber quem é a
+    // pessoa, e o pedido trava. O link para os termos tem o mesmo problema:
+    // sem propagar, o token morre no segundo salto
+    // (formulário → privacidade → termos → voltar).
+    //
+    // Duplicar ~10 linhas em três arquivos é de propósito: o portal é GitHub
+    // Pages, HTML estático puro, sem build. Um `<script src="…">` comum seria
+    // mais um arquivo e mais uma requisição para economizar linha nenhuma.
+    // ⚠️ Mexeu aqui, mexa nos outros dois.
+    // ======================================================================
+    (function propagarTokenNosLinks() {
+      const token = new URLSearchParams(window.location.search).get("token");
+
+      // Sem token, os links ficam como estão: alguém pode ter aberto este
+      // documento direto, de fora do fluxo, e ele precisa continuar navegável.
+      // O `"null"` como string aparece quando algum lugar interpola uma
+      // variável vazia dentro do link.
+      if (!token || token === "null" || token.trim() === "") return;
+
+      document.querySelectorAll("a[data-leva-token]").forEach((link) => {
+        // 🔒 `new URL(relativo, location.href)` resolve contra a origem desta
+        //    página, então o esquema é sempre o desta URL — um token
+        //    malicioso não vira `javascript:` nem aponta para fora.
+        //    `searchParams.set` percent-encoda sozinho, e a atribuição é na
+        //    propriedade `.href`, nunca via `innerHTML`.
+        const destino = new URL(link.getAttribute("href"), window.location.href);
+        destino.searchParams.set("token", token);
+        link.href = destino.toString();
+      });
+    })();
+  </script>
 </body>
 </html>

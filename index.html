@@ -380,11 +380,20 @@
           </li>
         </ul>
 
+        <!-- `data-leva-token`: marca os links internos do portal que precisam
+             carregar o `?token=` adiante. Quem faz isso é o bloco "PROPAGAÇÃO
+             DO TOKEN" lá embaixo, no script da página. Sem isso, quem abre os documentos
+             volta para um `index.html` sem token e perde a solicitação.
+             `target="_blank"` é conforto (mantém o formulário vivo numa aba
+             própria), NÃO é a correção — em navegador de celular a aba nova
+             costuma ser indistinguível de uma navegação normal. -->
         <p class="ajuda ajuda--maior">
           Leia o texto completo:
-          <a href="termos-curadoria.html">Termos de uso da curadoria</a>
+          <a href="termos-curadoria.html" data-leva-token
+             target="_blank" rel="noopener">Termos de uso da curadoria</a>
           e
-          <a href="privacidade-curadoria.html">Política de privacidade da curadoria</a>.
+          <a href="privacidade-curadoria.html" data-leva-token
+             target="_blank" rel="noopener">Política de privacidade da curadoria</a>.
         </p>
 
         <div class="caixa-aceite">
@@ -489,6 +498,54 @@
       etapaFormulario.classList.remove("oculto");
     } else {
       etapaLinkInvalido.classList.remove("oculto");
+    }
+
+    // ======================================================================
+    // PROPAGAÇÃO DO TOKEN ENTRE AS PÁGINAS DO PORTAL
+    // ----------------------------------------------------------------------
+    // O token só existe na query string — não há sessão, cookie nem storage
+    // (ver "Por que não guardar em storage", abaixo). Então qualquer link
+    // interno que a pessoa siga tem que levar o token junto, ou ela volta para
+    // um `index.html` pelado e a solicitação trava sem explicação.
+    //
+    // Isso acontece justamente com quem faz a coisa certa: quem para para ler
+    // os termos é quem perde o pedido; quem só marca o aceite passa direto.
+    //
+    // Este mesmo bloco existe, idêntico, em `termos-curadoria.html` e em
+    // `privacidade-curadoria.html` — os documentos também se referenciam entre
+    // si, e sem isso o token morreria no segundo salto
+    // (formulário → termos → privacidade → voltar).
+    //
+    // 🔒 Por que isto é seguro apesar de escrever entrada do usuário no DOM:
+    //    o destino é montado com `new URL(relativo, location.href)`, que resolve
+    //    contra a origem desta página — o esquema é SEMPRE o mesmo desta URL,
+    //    então não há como um token malicioso virar `javascript:` ou apontar
+    //    para fora. O `searchParams.set` percent-encoda o valor sozinho, e a
+    //    atribuição é na propriedade `.href`, nunca via `innerHTML`.
+    //    Por isso NÃO validamos o formato (os 40 hex) aqui: não acrescentaria
+    //    segurança nenhuma e quebraria o portal calado se o backend um dia
+    //    mudar o tamanho do token. Token inválido morre no backend, que é
+    //    quem sabe julgar isso.
+    //
+    // 🔒 Por que não guardar em `localStorage`/`sessionStorage`: o token é
+    //    credencial de uso único. No storage ele sobreviveria ao fluxo e ficaria
+    //    legível para qualquer outra página do mesmo origin — e
+    //    `mindfunga.github.io` hospeda todos os outros sites do projeto.
+    // ======================================================================
+    function propagarTokenNosLinks(tokenAtual) {
+      document.querySelectorAll("a[data-leva-token]").forEach((link) => {
+        // `getAttribute` devolve o href cru ("termos-curadoria.html"), não o
+        // absoluto já resolvido pelo navegador — é o que queremos como base.
+        const destino = new URL(link.getAttribute("href"), window.location.href);
+        destino.searchParams.set("token", tokenAtual);
+        link.href = destino.toString();
+      });
+    }
+
+    // Sem token na URL, os links ficam como estão: alguém pode ter aberto os
+    // documentos direto, de fora do fluxo, e eles precisam continuar abrindo.
+    if (tokenPresente) {
+      propagarTokenNosLinks(token);
     }
 
     // ======================================================================
